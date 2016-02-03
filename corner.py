@@ -47,7 +47,7 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
            truths=None, truth_color="#4682b4",
            scale_hist=False, quantiles=None, verbose=False, fig=None,
            max_n_ticks=5, top_ticks=False, use_math_text=False,
-           hist_kwargs=None, **hist2d_kwargs):
+           hist_kwargs=None, widen=False, **hist2d_kwargs):
     """
     Make a *sick* corner plot showing the projections of a data set in a
     multi-dimensional space. kwargs are passed to hist2d() or used for
@@ -178,7 +178,19 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
             raise ValueError("Lengths of weights must match number of samples")
 
     # Parse the parameter ranges.
-    if range is None:
+    if widen and range is not None:
+        for i in range(len(range)):
+            if truths is not None:
+                if truths[i] < range[i][0]:
+                    range[i][0] = truths[i] - 0.1 * (range[i][1] - truths[i])
+                elif truths[i] > range[i][1]:
+                    range[i][1] = truths[i] - 0.1 * (range[i][0] - truths[i])
+            if xs[i].min() < range[i][0]:
+                range[i][0] = xs[i].min()
+            elif xs[i].max() > range[i][1]:
+                range[i][1] = xs[i].max()
+                                     
+    elif range is None:
         if "extents" in hist2d_kwargs:
             logging.warn("Deprecated keyword argument 'extents'. "
                          "Use 'range' instead.")
