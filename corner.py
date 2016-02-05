@@ -179,7 +179,7 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
 
     # Parse the parameter ranges.
     if widen and range is not None:
-        for i, _ in enumerate(len(range)):
+        for i, _ in enumerate(range):
             if truths is not None:
                 if truths[i] < range[i][0]:
                     range[i][0] = truths[i] - 0.1 * (range[i][1] - truths[i])
