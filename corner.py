@@ -40,7 +40,7 @@ except ImportError:
     gaussian_filter = None
 
 
-def corner(xs, bins=20, range=None, weights=None, color="k",
+def corner(xs, bins=50, range=None, weights=None, color="k",
            smooth=None, smooth1d=None,
            labels=None, label_kwargs=None,
            show_titles=False, title_fmt=".2f", title_kwargs=None,
