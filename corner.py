@@ -269,24 +269,25 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
         else:
             ax = axes[i, i]
         # Plot the histograms.
-        if smooth1d is None:
-            n, _, _ = ax.hist(x, bins=bins[i], weights=weights,
-                              range=range[i], **hist_kwargs)
-        else:
-            if gaussian_filter is None:
-                raise ImportError("Please install scipy for smoothing")
-            n, b = np.histogram(x, bins=bins[i], weights=weights,
-                                range=range[i])
-            n = gaussian_filter(n, smooth1d)
-            x0 = np.array(list(zip(b[:-1], b[1:]))).flatten()
-            y0 = np.array(list(zip(n, n))).flatten()
-            ax.plot(x0, y0, **hist_kwargs)
+        if not np.all(np.isnan(x)) and not (range[i][0] == range[i][1]):
+            if smooth1d is None:
+                n, _, _ = ax.hist(x, bins=bins[i], weights=weights,
+                                  range=range[i], **hist_kwargs)
+            else:
+                if gaussian_filter is None:
+                    raise ImportError("Please install scipy for smoothing")
+                n, b = np.histogram(x, bins=bins[i], weights=weights,
+                                    range=range[i])
+                n = gaussian_filter(n, smooth1d)
+                x0 = np.array(list(zip(b[:-1], b[1:]))).flatten()
+                y0 = np.array(list(zip(n, n))).flatten()
+                ax.plot(x0, y0, **hist_kwargs)
 
-        if truths is not None and truths[i] is not None:
-            ax.axvline(truths[i], color=truth_color)
+            if truths is not None and truths[i] is not None:
+                ax.axvline(truths[i], color=truth_color)
 
         # Plot quantiles if wanted.
-        if len(quantiles) > 0:
+        if len(quantiles) > 0 and not np.all(np.isnan(x)) and not (range[i][0] == range[i][1]):
             qvalues = quantile(x, quantiles, weights=weights)
             for q in qvalues:
                 ax.axvline(q, ls="dashed", color=color)
@@ -321,7 +322,7 @@ def corner(xs, bins=20, range=None, weights=None, color="k",
 
         # Set up the axes.
         ax.set_xlim(range[i])
-        if scale_hist:
+        if scale_hist and not np.all(np.isnan(x)) and not (range[i][0] == range[i][1]):
             maxn = np.max(n)
             ax.set_ylim(-0.1 * maxn, 1.1 * maxn)
         else:
@@ -471,7 +472,10 @@ def hist2d(x, y, bins=20, range=None, weights=None, levels=None, smooth=None,
     """
     if ax is None:
         ax = pl.gca()
-
+    
+    if np.all(np.isnan(x)) or np.all(np.isnan(y)):
+        return
+    
     # Set the default range based on the data range if not provided.
     if range is None:
         if "extent" in kwargs:
